@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:style="@style/CardView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="10dp">
+
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <TextView
+            android:id="@+id/item_query_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            android:textSize="18sp"
+            android:padding="10dp"
+            android:text="Футбол России"/>
+
+        <TextView
+            android:id="@+id/item_query_url"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:textStyle="italic"
+            android:textColor="#3d5afe"
+            android:textSize="14sp"
+            android:padding="5dp"
+            android:text="https://www.rusfootball.info/"
+            android:textAlignment="viewEnd"/>
+
+        <TextView
+            android:id="@+id/item_query_description"
+            android:text="Последние новости футбола в России и за рубежом. Чемпионат Мира 2018. \nСборная России. Все трансферы межсезонья. Лига чемпионов, Лига ..."
+            android:textSize="14sp"
+            android:padding="15dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+    </LinearLayout>
+</android.support.v7.widget.CardView>
