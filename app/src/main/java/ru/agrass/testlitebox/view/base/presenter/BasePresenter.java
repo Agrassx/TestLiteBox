@@ -1,12 +1,12 @@
-package ru.agrass.testlitebox.view.base;
+package ru.agrass.testlitebox.view.base.presenter;
 
 
 import io.reactivex.disposables.CompositeDisposable;
-import ru.agrass.testlitebox.model.database.DataBaseImpl;
 import ru.agrass.testlitebox.model.network.NetworkAPI;
 import ru.agrass.testlitebox.model.network.NetworkClient;
 import ru.agrass.testlitebox.utils.rx.AppSchedulerProvider;
 import ru.agrass.testlitebox.utils.rx.SchedulerProvider;
+import ru.agrass.testlitebox.view.base.IView;
 
 public abstract class BasePresenter<V extends IView> implements IPresenter<V> {
 
@@ -31,6 +31,10 @@ public abstract class BasePresenter<V extends IView> implements IPresenter<V> {
 
     public V getView() {
         return view;
+    }
+
+    protected void errorHandler(Throwable throwable) {
+        throwable.printStackTrace();
     }
 
     @Override

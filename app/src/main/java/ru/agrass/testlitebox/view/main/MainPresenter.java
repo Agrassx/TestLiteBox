@@ -3,6 +3,7 @@ package ru.agrass.testlitebox.view.main;
 import android.content.Context;
 
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
@@ -10,7 +11,7 @@ import ru.agrass.testlitebox.model.database.DataBaseImpl;
 import ru.agrass.testlitebox.model.entity.Page;
 import ru.agrass.testlitebox.model.entity.Query;
 import ru.agrass.testlitebox.model.network.responses.QueryResponse;
-import ru.agrass.testlitebox.view.base.BasePresenter;
+import ru.agrass.testlitebox.view.base.presenter.BasePresenter;
 
 public class MainPresenter<V extends MainView> extends BasePresenter<V> implements IMainPresenter<V> {
 
@@ -41,7 +42,7 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
 
     @Override
     public void pause() {
-        getCompositeDisposable().clear();
+
     }
 
     @Override
@@ -52,23 +53,24 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
     private void saveQuery(String query) {
         saveQueryDisposable = Observable
                 .fromCallable(() -> dataBase.saveQuery(
-                        new Query(query, System.currentTimeMillis())
+        new Query(query, System.currentTimeMillis())
                 ))
+                .delaySubscription(1, TimeUnit.SECONDS)
                 .subscribeOn(getSchedulerProvider().io())
                 .observeOn(getSchedulerProvider().ui())
-                .subscribe(id -> getPages(id, query), this::ErrorHandler);
+                .subscribe(id -> getPages(id, query), this::errorHandler);
         getCompositeDisposable().add(saveQueryDisposable);
     }
 
     private void getPages(long queryUid, String query) {
+        getView().showDialog("get data from api (3 sec)...");
         queryDisposable = getApi()
                 .getPages(query.replace(SPACE_CHAR, PLUS_CHAR))
                 .subscribeOn(getSchedulerProvider().io())
+                .delay(3, TimeUnit.SECONDS)
                 .map(QueryResponse::getItems)
                 .observeOn(getSchedulerProvider().ui())
-                .subscribe(pageList -> {
-                    savePages(queryUid, pageList);
-                }, this::ErrorHandler);
+                .subscribe(pageList -> savePages(queryUid, pageList), this::errorHandler);
         getCompositeDisposable().add(queryDisposable);
     }
 
@@ -80,23 +82,25 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
                 .fromCallable(() -> dataBase.getPagesByQueryUid(uid))
                 .subscribeOn(getSchedulerProvider().io())
                 .observeOn(getSchedulerProvider().ui())
-                .subscribe(this::showPages, this::ErrorHandler);
+                .subscribe(this::showPages, this::errorHandler);
     }
 
     @Override
     public void query(String q) {
-        getView().showLoadingDialog();
+//        getView().showLoadingDialog();
+        getView().showDialog("Save query (fast dialog)...");
         saveQuery(q);
     }
 
     @Override
     public void getLastPages() {
-        getView().showLoadingDialog();
+//        getView().showLoadingDialog();
+        getView().showDialog("Loading");
         lastQueryDisposable = Observable
                 .fromCallable(() -> dataBase.getLastQuery())
                 .subscribeOn(getSchedulerProvider().io())
                 .observeOn(getSchedulerProvider().ui())
-                .subscribe(this::getPagesByQueryUid, this::ErrorHandler);
+                .subscribe(this::getPagesByQueryUid, this::errorHandler);
         getCompositeDisposable().add(lastQueryDisposable);
     }
 
@@ -110,12 +114,13 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
                 })
                 .toList()
                 .observeOn(getSchedulerProvider().ui())
-                .subscribe(this::showPages, this::ErrorHandler);
+                .subscribe(this::showPages, this::errorHandler);
         getCompositeDisposable().add(savePageDisposable);
     }
 
     private void showPages(List<Page> pageList) {
-        getView().closeLoadingDialog();
+//        getView().closeLoadingDialog();
+        getView().hideDialog();
         if (savePageDisposable != null && !savePageDisposable.isDisposed())
             savePageDisposable.dispose();
 
@@ -128,7 +133,9 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
         getView().showPages(pageList);
     }
 
-    private void ErrorHandler(Throwable throwable) {
+    @Override
+    protected void errorHandler(Throwable throwable) {
+        super.errorHandler(throwable);
         if (saveQueryDisposable != null && !saveQueryDisposable.isDisposed())
             saveQueryDisposable.dispose();
         if (queryDisposable != null && !queryDisposable.isDisposed())
@@ -140,9 +147,9 @@ public class MainPresenter<V extends MainView> extends BasePresenter<V> implemen
         if (lastPagesDisposable != null && !lastPagesDisposable.isDisposed())
             lastPagesDisposable.dispose();
 
-        getView().closeLoadingDialog();
-        throwable.printStackTrace();
-        getView().showMessage("Something wrong");
+        getView().hideDialog();
+//
+        getView().showError("Something wrong");
     }
 
 

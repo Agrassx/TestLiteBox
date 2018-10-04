@@ -5,19 +5,15 @@ import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.Toast;
-
-import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,8 +24,9 @@ import butterknife.Unbinder;
 import ru.agrass.testlitebox.R;
 import ru.agrass.testlitebox.model.entity.Page;
 import ru.agrass.testlitebox.view.adapters.QueryItemAdapter;
+import ru.agrass.testlitebox.view.base.activity.BaseActivity;
 
-public class MainActivity extends AppCompatActivity implements MainView {
+public class MainActivity extends BaseActivity<MainView> implements MainView {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private static final String PAGE_LIST = "page_list";
@@ -47,6 +44,7 @@ public class MainActivity extends AppCompatActivity implements MainView {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        setView(this);
         unbinder = ButterKnife.bind(this);
         mRecyclerView = findViewById(R.id.queryResultsRecyclerView);
         presenter = new MainPresenter<>(getApplicationContext());
@@ -115,6 +113,11 @@ public class MainActivity extends AppCompatActivity implements MainView {
     }
 
     @Override
+    public void showError(String errorMessage) {
+        Toast.makeText(this, errorMessage, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         presenter.destroy();
@@ -130,6 +133,20 @@ public class MainActivity extends AppCompatActivity implements MainView {
         adapter.notifyDataSetChanged();
     }
 
+
+    @Override
+    public void showDialog(String message) {
+        super.showDialog(message);
+//        Либо своя реализация...
+//        Переопределять методы не обязательно
+    }
+
+    @Override
+    public void hideDialog() {
+        super.hideDialog();
+//        Либо своя реализация...
+    }
+
     @Override
     public void showLoadingDialog() {
         progressBar.setVisibility(View.VISIBLE);
@@ -139,4 +156,5 @@ public class MainActivity extends AppCompatActivity implements MainView {
     public void closeLoadingDialog() {
         progressBar.setVisibility(View.INVISIBLE);
     }
+
 }
