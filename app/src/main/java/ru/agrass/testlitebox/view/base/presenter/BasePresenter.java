@@ -1,5 +1,6 @@
 package ru.agrass.testlitebox.view.base.presenter;
 
+import android.app.DialogFragment;
 
 import io.reactivex.disposables.CompositeDisposable;
 import ru.agrass.testlitebox.model.network.NetworkAPI;

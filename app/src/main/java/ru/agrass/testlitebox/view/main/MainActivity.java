@@ -24,6 +24,8 @@ import butterknife.Unbinder;
 import ru.agrass.testlitebox.R;
 import ru.agrass.testlitebox.model.entity.Page;
 import ru.agrass.testlitebox.view.adapters.QueryItemAdapter;
+import ru.agrass.testlitebox.view.base.DialogManager;
+import ru.agrass.testlitebox.view.base.LoadingDialog;
 import ru.agrass.testlitebox.view.base.activity.BaseActivity;
 
 public class MainActivity extends BaseActivity<MainView> implements MainView {
@@ -35,6 +37,7 @@ public class MainActivity extends BaseActivity<MainView> implements MainView {
     private SearchView searchView;
     private QueryItemAdapter adapter;
     private MainPresenter<MainView> presenter;
+    private DialogManager<LoadingDialog> dialogManager;
 
     @BindView(R.id.queryResultsRecyclerView) RecyclerView mRecyclerView;
     @BindView(R.id.toolbar) Toolbar toolbar;
@@ -45,6 +48,7 @@ public class MainActivity extends BaseActivity<MainView> implements MainView {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setView(this);
+        dialogManager = new DialogManager<>(getSupportFragmentManager());
         unbinder = ButterKnife.bind(this);
         mRecyclerView = findViewById(R.id.queryResultsRecyclerView);
         presenter = new MainPresenter<>(getApplicationContext());
@@ -121,6 +125,7 @@ public class MainActivity extends BaseActivity<MainView> implements MainView {
     protected void onDestroy() {
         super.onDestroy();
         presenter.destroy();
+        dialogManager.destroy();
         if (unbinder != null) {
             unbinder.unbind();
         }
@@ -136,25 +141,24 @@ public class MainActivity extends BaseActivity<MainView> implements MainView {
 
     @Override
     public void showDialog(String message) {
-        super.showDialog(message);
+//        super.showDialog(message);
 //        Либо своя реализация...
 //        Переопределять методы не обязательно
+        if (dialogManager.getDialog() == null) {
+            dialogManager.showDialog(
+                    LoadingDialog.newInstance(message),
+                    LoadingDialog.getTAG()
+            );
+            return;
+        }
+        dialogManager.getDialog().setMessage(message);
     }
 
     @Override
     public void hideDialog() {
-        super.hideDialog();
+//        super.hideDialog();
 //        Либо своя реализация...
-    }
-
-    @Override
-    public void showLoadingDialog() {
-        progressBar.setVisibility(View.VISIBLE);
-    }
-
-    @Override
-    public void closeLoadingDialog() {
-        progressBar.setVisibility(View.INVISIBLE);
+        dialogManager.hideDialog();
     }
 
 }
